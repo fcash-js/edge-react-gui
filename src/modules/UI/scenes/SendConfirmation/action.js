@@ -16,6 +16,7 @@ import {
   makeSpend,
   makeSpendInfo,
   saveTransaction,
+  setTransactionDetailsRequest,
   signTransaction
 } from '../../../Core/Wallets/api.js'
 import type { Dispatch, GetState } from '../../../ReduxTypes'
@@ -138,14 +139,17 @@ export const updateMaxSpend = () => (dispatch: Dispatch, getState: GetState) => 
 
 export const signBroadcastAndSave = () => async (dispatch: Dispatch, getState: GetState) => {
   const state = getState()
+  const sceneState = state.ui.scenes.sendConfirmation
   const account = getAccount(state)
   const selectedWalletId = getSelectedWalletId(state)
   const wallet = getWallet(state, selectedWalletId)
   const edgeUnsignedTransaction = getTransaction(state)
-  const spendInfo = state.ui.scenes.sendConfirmation.spendInfo
+  const spendInfo = sceneState.spendInfo
+  const destination = sceneState.destination
+
   if (!spendInfo) throw new Error('Invalid Spend Request')
   const authRequired = getAuthRequired(state, spendInfo)
-  const pin = state.ui.scenes.sendConfirmation.pin
+  const pin = sceneState.pin
 
   dispatch(updateSpendPending(true))
 
@@ -167,6 +171,9 @@ export const signBroadcastAndSave = () => async (dispatch: Dispatch, getState: G
       message: 'Your transaction has been successfully sent.'
     }
     dispatch({ type: 'OPEN_AB_ALERT', data: successInfo })
+    if (destination) {
+      setTransactionDetailsRequest(wallet, edgeSignedTransaction.txid, edgeSignedTransaction.currencyCode, { name: destination })
+    }
   } catch (e) {
     dispatch(updateSpendPending(false))
     const errorInfo = {
