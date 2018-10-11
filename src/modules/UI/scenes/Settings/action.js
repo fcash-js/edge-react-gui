@@ -1,6 +1,6 @@
 // @flow
 
-import { showYesNoModal } from 'edge-components'
+import { createYesNoModal } from 'edge-components'
 import type { EdgeAccount } from 'edge-core-js'
 import { disableTouchId, enableTouchId } from 'edge-login-ui-rn'
 import React from 'react'
@@ -227,7 +227,7 @@ export function togglePinLoginEnabled (pinLoginEnabled: boolean) {
 
 export const showReEnableOtpModal = () => async (dispatch: Dispatch) => {
   // Use `showModal` to put the modal component on screen:
-  const modal = showYesNoModal({
+  const modal = createYesNoModal({
     title: s.strings.title_otp_keep_modal,
     message: s.strings.otp_modal_reset_description,
     icon: <Image source={iconImage} />,
