@@ -26,24 +26,24 @@ type Props = {
   isCustomNodesEnabled?: boolean,
   customNodesList: Array<string>,
   saveCustomNodesList: (Array<string>) => void,
-  isSetCustomNodesModalVisible: boolean,
   setCustomNodesModalVisibility: (visibility: boolean | null) => void,
   enableCustomNodes: () => void,
   disableCustomNodes: () => void,
   logo: string,
-  isSetCustomNodesProcessing: boolean,
   defaultElectrumServer: string
 }
 
 type State = {
-  isSetEnabledCustomNodesModalVisible: boolean
+  isSetCustomNodesModalVisible: boolean,
+  activatedBy: string | null
 }
 
 export default class CurrencySettings extends Component<Props, State> {
   constructor (props: Props) {
     super(props)
     this.state = {
-      isSetEnabledCustomNodesModalVisible: false
+      isSetCustomNodesModalVisible: false,
+      activatedBy: null
     }
   }
 
@@ -75,8 +75,20 @@ export default class CurrencySettings extends Component<Props, State> {
     return this.props.selectDenomination(key)
   }
 
-  closeSetCustomNodesModal = () => {
-    this.props.setCustomNodesModalVisibility(false)
+  closeSetCustomNodesModal = (callback: () => mixed) => {
+    this.setState(
+      {
+        isSetCustomNodesModalVisible: false
+      },
+      callback
+    )
+  }
+
+  openSetCustomNodesModal = (activatedBy: string) => {
+    this.setState({
+      isSetCustomNodesModalVisible: true,
+      activatedBy
+    })
   }
 
   enableSetCustomNodes = () => {
@@ -89,7 +101,13 @@ export default class CurrencySettings extends Component<Props, State> {
 
   onChangeEnableCustomNodes = () => {
     if (!this.props.isCustomNodesEnabled) {
-      this.enableSetCustomNodes()
+      this.setState(
+        {
+          isSetCustomNodesModalVisible: true
+        },
+        this.enableSetCustomNodes
+      )
+      this.openSetCustomNodesModal('switch')
     } else {
       this.disableSetCustomNodes()
     }
@@ -103,12 +121,14 @@ export default class CurrencySettings extends Component<Props, State> {
           <View style={styles.container}>
             {this.props.defaultElectrumServer && (
               <SetCustomNodesModal
-                isActive={this.props.isSetCustomNodesModalVisible}
+                isActive={this.state.isSetCustomNodesModalVisible}
                 onExit={this.closeSetCustomNodesModal}
                 customNodesList={this.props.customNodesList}
                 saveCustomNodesList={this.props.saveCustomNodesList}
-                isSetCustomNodesProcessing={this.props.isSetCustomNodesProcessing}
                 defaultElectrumServer={this.props.defaultElectrumServer}
+                disableCustomNodes={this.props.disableCustomNodes}
+                isCustomNodesEnabled={this.props.isCustomNodesEnabled}
+                activatedBy={this.state.activatedBy}
               />
             )}
             {this.header(SETTINGS_DENOMINATION_TEXT)}
@@ -133,11 +153,10 @@ export default class CurrencySettings extends Component<Props, State> {
                   leftText={s.strings.settings_enable_custom_nodes}
                   onToggle={this.onChangeEnableCustomNodes}
                   value={this.props.isCustomNodesEnabled}
-                  isActive={this.props.isSetCustomNodesModalVisible}
                   onSaveCustomNodesList={this.props.saveCustomNodesList}
                 />
                 <ModalRow
-                  onPress={() => this.props.setCustomNodesModalVisibility(true)}
+                  onPress={() => this.openSetCustomNodesModal('row')}
                   leftText={s.strings.settings_set_custom_nodes_modal_title}
                   disabled={!this.props.isCustomNodesEnabled}
                 />

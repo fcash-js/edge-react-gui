@@ -1,9 +1,10 @@
 // @flow
 import React, { Component } from 'react'
-import { ActivityIndicator, TextInput, View } from 'react-native'
+import { TextInput, View } from 'react-native'
 
 import * as Constants from '../../../../../constants/indexConstants.js'
 import s from '../../../../../locales/strings.js'
+import { noOp } from '../../../../utils.js'
 import { PrimaryButton, SecondaryButton } from '../../../components/Buttons'
 import Text from '../../../components/FormattedText/FormattedText.ui.js'
 import { Icon } from '../../../components/Icon/Icon.ui.js'
@@ -12,11 +13,12 @@ import styles, { styles as rawStyle } from './styles.js'
 
 export type SetCustomNodesModalOwnProps = {
   isActive: boolean,
-  onExit: () => void,
+  onExit: Function => mixed,
   customNodesList: Array<string>,
   saveCustomNodesList: (Array<string>) => void,
-  isSetCustomNodesProcessing: boolean,
-  defaultElectrumServer: string
+  defaultElectrumServer: string,
+  disableCustomNodes: () => void,
+  activatedBy: string | null
 }
 
 export type SetCustomNodesModalState = {
@@ -41,16 +43,27 @@ export class SetCustomNodesModal extends Component<SetCustomNodeModalProps, SetC
   }
 
   handleSave = () => {
-    if (this.state.readableNodesList) {
-      const parsedNodesList = this.state.readableNodesList.split('\n')
-      const cleanedNodesList = parsedNodesList.map(item => {
-        // remove unwanted spaces
-        return item.replace(' ', '')
-      })
-      this.props.saveCustomNodesList(cleanedNodesList)
+    this.props.onExit(() => {
+      if (this.state.readableNodesList) {
+        const parsedNodesList = this.state.readableNodesList.split('\n')
+        const cleanedNodesList = parsedNodesList.map(item => {
+          // remove unwanted spaces
+          return item.replace(' ', '')
+        })
+        this.props.saveCustomNodesList(cleanedNodesList)
+      } else {
+        // if empty then pass an empty array otherwise it will save as [""] which is NOT falsy
+        this.props.disableCustomNodes()
+      }
+    })
+  }
+
+  onCancel = () => {
+    if (this.props.activatedBy === 'row') {
+      this.props.onExit(noOp)
     } else {
-      // if empty then pass an empty array otherwise it will save as [""] which is NOT falsy
-      this.props.saveCustomNodesList([])
+      // was opened via toggle
+      this.props.onExit(this.props.disableCustomNodes)
     }
   }
 
@@ -82,11 +95,9 @@ export class SetCustomNodesModal extends Component<SetCustomNodeModalProps, SetC
         <InteractiveModal.Footer>
           <View style={styles.buttonsWrap}>
             <PrimaryButton onPress={this.handleSave} style={styles.primaryButton}>
-              <PrimaryButton.Text style={styles.primaryButtonText}>
-                {this.props.isSetCustomNodesProcessing ? <ActivityIndicator style={{ height: 18 }} /> : s.strings.string_save}
-              </PrimaryButton.Text>
+              <PrimaryButton.Text style={styles.primaryButtonText}>{s.strings.string_save}</PrimaryButton.Text>
             </PrimaryButton>
-            <SecondaryButton onPress={this.props.onExit} style={styles.secondaryButton}>
+            <SecondaryButton onPress={this.onCancel} style={styles.secondaryButton}>
               <SecondaryButton.Text style={styles.secondaryButtonText}>{s.strings.string_cancel_cap}</SecondaryButton.Text>
             </SecondaryButton>
           </View>

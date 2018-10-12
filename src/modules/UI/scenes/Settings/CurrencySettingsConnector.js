@@ -6,7 +6,7 @@ import { CURRENCY_PLUGIN_NAMES } from '../../../../constants/indexConstants.js'
 import { getAccount } from '../../../Core/selectors.js'
 import type { Dispatch, State } from '../../../ReduxTypes.js'
 import * as SETTINGS_SELECTORS from '../../Settings/selectors'
-import { disableCustomNodes, enableCustomNodes, saveCustomNodesList, setDenominationKeyRequest, updateIsSetCustomNodesModalVisible } from './action'
+import { disableCustomNodes, enableCustomNodes, saveCustomNodesList, setDenominationKeyRequest } from './action'
 import CurrencySettings from './CurrencySettings.ui'
 
 const mapStateToProps = (state: State, ownProps) => {
@@ -22,8 +22,6 @@ const mapStateToProps = (state: State, ownProps) => {
     selectedDenominationKey: SETTINGS_SELECTORS.getDisplayDenominationKey(state, ownProps.currencyCode),
     isCustomNodesEnabled: (customNodesSetting && customNodesSetting.isEnabled) || false,
     customNodesList: (customNodesSetting && customNodesSetting.nodesList) || [],
-    isSetCustomNodesModalVisible: state.ui.scenes.settings.isSetCustomNodesModalVisible,
-    isSetCustomNodesProcessing: state.ui.scenes.settings.isSetCustomNodesProcessing,
     defaultElectrumServer
   }
 }
@@ -38,7 +36,6 @@ const mapDispatchToProps = (dispatch: Dispatch, ownProps) => {
     disableCustomNodes: () => {
       dispatch(disableCustomNodes(ownProps.currencyCode))
     },
-    setCustomNodesModalVisibility: (visibility: boolean) => dispatch(updateIsSetCustomNodesModalVisible(visibility)),
     saveCustomNodesList: (nodesList: Array<string>) => dispatch(saveCustomNodesList(ownProps.currencyCode, nodesList))
   }
 }

@@ -62,10 +62,6 @@ test('initialState', () => {
       parsedUri: null
     },
     sendConfirmation: SendConfirmationInitialState,
-    settings: {
-      isSetCustomNodesModalVisible: false,
-      isSetCustomNodesProcessing: false
-    },
     changeMiningFee: {
       isCustomFeeVisible: false
     },

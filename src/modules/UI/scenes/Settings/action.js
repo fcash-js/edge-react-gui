@@ -26,6 +26,7 @@ export type UpdateIsSetCustomNodesModalVisibleAction = {
   type: 'SET_CUSTOM_NODES_MODAL_VISIBILITY',
   data: { isSetCustomNodesModalVisible: boolean }
 }
+
 export type SetIsCustomNodesEnabledType = {
   type: 'SET_ENABLE_CUSTOM_NODES',
   data: { currencyCode: string, isEnabled: boolean }
@@ -254,6 +255,7 @@ export const updateIsSetCustomNodesModalVisible = (isSetCustomNodesModalVisible:
     data: { isSetCustomNodesModalVisible }
   }
 }
+
 export const enableCustomNodes = (currencyCode: string) => async (dispatch: Dispatch, getState: GetState) => {
   const state: State = getState()
   const account = CORE_SELECTORS.getAccount(state)
@@ -269,6 +271,7 @@ export const enableCustomNodes = (currencyCode: string) => async (dispatch: Disp
     throw new Error(e)
   }
 }
+
 export const disableCustomNodes = (currencyCode: string) => async (dispatch: Dispatch, getState: GetState) => {
   const state: State = getState()
   const account = CORE_SELECTORS.getAccount(state)
@@ -284,12 +287,14 @@ export const disableCustomNodes = (currencyCode: string) => async (dispatch: Dis
     throw new Error(e)
   }
 }
+
 export function setIsCustomNodesEnabled (currencyCode: string, isEnabled: boolean) {
   return {
     type: 'SET_ENABLE_CUSTOM_NODES',
     data: { currencyCode, isEnabled }
   }
 }
+
 export const saveCustomNodesList = (currencyCode: string, nodesList: Array<string>) => async (dispatch: Dispatch, getState: GetState) => {
   const state: State = getState()
   dispatch(updateCustomNodesProcessing(true))
