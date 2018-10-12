@@ -11,13 +11,13 @@ export type SettingsSceneState = {
 export const isSetCustomNodesModalVisible = (state: boolean = false, action: Action): boolean => {
   switch (action.type) {
     case 'SET_CUSTOM_NODES_MODAL_VISIBILITY':
-      if (!action.data) throw new TypeError('Invalid action')    
+      if (!action.data) throw new TypeError('Invalid action')
       const { isSetCustomNodesModalVisible } = action.data
       return isSetCustomNodesModalVisible
     case 'UPDATE_CUSTOM_NODES_LIST':
       return false
     case 'SET_ENABLE_CUSTOM_NODES':
-      if (!action.data) throw new TypeError('Invalid action')    
+      if (!action.data) throw new TypeError('Invalid action')
       if (action.data.isEnabled) {
         return true
       }

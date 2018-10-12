@@ -34,13 +34,13 @@ export class SetCustomNodesModal extends Component<SetCustomNodeModalProps, SetC
     }
   }
 
-   onChangeText = (input: string) => {
+  onChangeText = (input: string) => {
     this.setState({
       readableNodesList: input
     })
   }
 
-   handleSave = () => {
+  handleSave = () => {
     if (this.state.readableNodesList) {
       const parsedNodesList = this.state.readableNodesList.split('\n')
       const cleanedNodesList = parsedNodesList.map(item => {
@@ -54,16 +54,16 @@ export class SetCustomNodesModal extends Component<SetCustomNodeModalProps, SetC
     }
   }
 
-   render () {
+  render () {
     return (
       <InteractiveModal legacy isActive={this.props.isActive}>
         <InteractiveModal.Icon>
           <Icon style={styles.txIDIcon} name={Constants.QUESTION_ICON} type={Constants.FONT_AWESOME} size={22} />
         </InteractiveModal.Icon>
-         <InteractiveModal.Title>
+        <InteractiveModal.Title>
           <Text>{s.strings.settings_set_custom_nodes_modal_title}</Text>
         </InteractiveModal.Title>
-         <InteractiveModal.Body>
+        <InteractiveModal.Body>
           <InteractiveModal.Description style={{ textAlign: 'center' }}>{s.strings.settings_set_custom_nodes_modal_instructions}</InteractiveModal.Description>
           <View style={styles.customNodesInputWrap}>
             <TextInput
@@ -79,7 +79,7 @@ export class SetCustomNodesModal extends Component<SetCustomNodeModalProps, SetC
             />
           </View>
         </InteractiveModal.Body>
-         <InteractiveModal.Footer>
+        <InteractiveModal.Footer>
           <View style={styles.buttonsWrap}>
             <PrimaryButton onPress={this.handleSave} style={styles.primaryButton}>
               <PrimaryButton.Text style={styles.primaryButtonText}>
