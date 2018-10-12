@@ -23,6 +23,7 @@ import { type RequestSceneState, request } from './Request/reducer.js'
 import { type ScanState, scan } from './Scan/reducer.js'
 import { type UniqueIdentifierModalState, uniqueIdentifierModal } from './SendConfirmation/components/UniqueIdentifierModal/UniqueIdentifierModalReducer.js'
 import { type SendConfirmationState, sendConfirmation } from './SendConfirmation/reducer.js'
+import { type SettingsSceneState, settings } from './Settings/reducer.js'
 import { type TransactionDetailsState, transactionDetails } from './TransactionDetails/reducer.js'
 import { type TransactionListState, transactionList } from './TransactionList/reducer.js'
 import { type WalletListState, walletList } from './WalletList/reducer.js'
@@ -43,6 +44,7 @@ export type ScenesState = {
   +request: RequestSceneState,
   +requestType: RequestTypeState,
   +scan: ScanState,
+  +settings: SettingsSceneState,
   +sendConfirmation: SendConfirmationState,
   +transactionAlert: TransactionAlertState,
   +transactionDetails: TransactionDetailsState,
@@ -81,6 +83,7 @@ export const scenes: Reducer<ScenesState, Action> = combineReducers({
   request,
   requestType,
   scan,
+  settings,
   sendConfirmation,
   transactionAlert,
   transactionDetails,

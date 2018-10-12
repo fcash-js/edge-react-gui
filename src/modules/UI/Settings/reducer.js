@@ -39,34 +39,32 @@ export const initialState = {
   }
 }
 
+export type CurrencySetting = {
+  denomination: string,
+  customNodes?: {
+    nodesList?: Array<string>,
+    isEnabled?: boolean
+  }
+}
+
 export type SettingsState = {
-  BCH: {
-    denomination: string
-  },
-  BTC: {
-    denomination: string
-  },
-  DASH: {
-    denomination: string
-  },
-  FTC: {
-    denomination: string
-  },
-  ETH: {
-    denomination: string
-  },
-  LTC: {
-    denomination: string
-  },
-  UFO: {
-    denomination: string
-  },
-  REP: {
-    denomination: string
-  },
-  WINGS: {
-    denomination: string
-  },
+  BCH: CurrencySetting,
+  BTC: CurrencySetting,
+  DASH: CurrencySetting,
+  FTC: CurrencySetting,
+  ETH: CurrencySetting,
+  LTC: CurrencySetting,
+  VTC: CurrencySetting,
+  XZC: CurrencySetting,
+  QTUM: CurrencySetting,
+  UFO: CurrencySetting,
+  XMR: CurrencySetting,
+  XRP: CurrencySetting,
+  REP: CurrencySetting,
+  DOGE: CurrencySetting,
+  DGB: CurrencySetting,
+  WINGS: CurrencySetting,
+
   account: ?Object,
   autoLogoutTimeInSeconds: number,
   bluetoothMode: boolean,
@@ -210,12 +208,14 @@ export const settingsLegacy = (state: SettingsState = initialState, action: Acti
       denominationKeys.forEach(key => {
         const currencyCode = key.currencyCode
         const denomination = key.denominationKey
+        const customNodes = key.customNodes
         const currencyState = newState[currencyCode]
         newState = {
           ...newState,
           [currencyCode]: {
             ...currencyState,
-            denomination
+            denomination,
+            customNodes
           }
         }
       })
@@ -497,19 +497,6 @@ export const settingsLegacy = (state: SettingsState = initialState, action: Acti
       }
     }
 
-    case 'UI/SETTINGS/SET_BITCOIN_OVERRIDE_SERVER': {
-      if (!action.data) throw new Error('Invalid action')
-      const { overrideServer } = action.data
-      const BTC = state['BTC']
-      return {
-        ...state,
-        BTC: {
-          ...BTC,
-          overrideServer
-        }
-      }
-    }
-
     case 'UI/SETTINGS/SET_SETTINGS_LOCK': {
       return {
         ...state,
@@ -549,6 +536,38 @@ export const settingsLegacy = (state: SettingsState = initialState, action: Acti
         ...state,
         isTouchEnabled: action.data.isTouchEnabled
       }
+    }
+
+    case 'SET_ENABLE_CUSTOM_NODES': {
+      if (!action.data) throw new Error('Invalid action')
+      const { isEnabled, currencyCode } = action.data
+      const updatedSettings = {
+        ...state,
+        [currencyCode]: {
+          ...state[currencyCode],
+          customNodes: {
+            ...state[currencyCode].customNodes,
+            isEnabled
+          }
+        }
+      }
+      return updatedSettings
+    }
+
+    case 'UPDATE_CUSTOM_NODES_LIST': {
+      if (!action.data) throw new Error('Invalid action')
+      const { nodesList, currencyCode } = action.data
+      const updatedSettings = {
+        ...state,
+        [currencyCode]: {
+          ...state[currencyCode],
+          customNodes: {
+            ...state[currencyCode].customNodes,
+            nodesList
+          }
+        }
+      }
+      return updatedSettings
     }
 
     case 'UI/SETTINGS/ADD_CURRENCY_PLUGIN': {

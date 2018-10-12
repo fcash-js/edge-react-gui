@@ -7,9 +7,10 @@ import React from 'react'
 import { Image } from 'react-native'
 import { Actions } from 'react-native-router-flux'
 
-import type { Dispatch, GetState } from '../../../../../src/modules/ReduxTypes.js'
+import type { Dispatch, GetState, State } from '../../../../../src/modules/ReduxTypes.js'
 import { keepOtp } from '../../../../actions/OtpActions.js'
 import iconImage from '../../../../assets/images/otp/OTP-badge_sm.png'
+import { CURRENCY_PLUGIN_NAMES } from '../../../../constants/indexConstants.js'
 import s from '../../../../locales/strings.js'
 import { restoreWalletsRequest } from '../../../Core/Account/api.js'
 import * as ACCOUNT_SETTINGS from '../../../Core/Account/settings.js'
@@ -20,6 +21,22 @@ import { convertCurrency } from '../../../UI/selectors.js'
 import { displayErrorAlert } from '../../components/ErrorAlert/actions.js'
 import * as SETTINGS_ACTIONS from '../../Settings/action.js'
 import { newSpendingLimits } from '../../Settings/spendingLimits/SpendingLimitsReducer.js'
+
+export type UpdateIsSetCustomNodesModalVisibleAction = {
+  type: 'SET_CUSTOM_NODES_MODAL_VISIBILITY',
+  data: { isSetCustomNodesModalVisible: boolean }
+}
+export type SetIsCustomNodesEnabledType = {
+  type: 'SET_ENABLE_CUSTOM_NODES',
+  data: { currencyCode: string, isEnabled: boolean }
+}
+
+export type UpdateCustomNodesProcessingAction = {
+  type: 'UPDATE_CUSTOM_NODES_PROCESSING',
+  data: { isSetCustomNodesProcessing: boolean }
+}
+
+export type SettingsSceneAction = UpdateIsSetCustomNodesModalVisibleAction | SetIsCustomNodesEnabledType | UpdateCustomNodesProcessingAction
 
 const setPINModeStart = (pinMode: boolean) => ({
   type: 'UI/SCENES/SETTINGS/SET_PIN_MODE_START',
@@ -44,11 +61,6 @@ const setMerchantModeStart = (merchantMode: boolean) => ({
 const setBluetoothModeStart = (bluetoothMode: boolean) => ({
   type: 'UI/SCENES/SETTINGS/SET_BLUETOOTH_MODE_START',
   data: { bluetoothMode }
-})
-
-const setBitcoinOverrideServerStart = (overrideServer: string) => ({
-  type: 'UI/SCENES/SETTINGS/SET_BITCOIN_OVERRIDE_SERVER_START',
-  data: { overrideServer }
 })
 
 export const setPINModeRequest = (pinMode: boolean) => (dispatch: Dispatch, getState: GetState) => {
@@ -183,12 +195,6 @@ export const setDenominationKeyRequest = (currencyCode: string, denominationKey:
     .catch(onError)
 }
 
-export const setBitcoinOverrideServerRequest = (overrideServer: string) => (dispatch: Dispatch) => {
-  dispatch(setBitcoinOverrideServerStart(overrideServer))
-
-  dispatch(SETTINGS_ACTIONS.setBitcoinOverrideServer(overrideServer))
-}
-
 // touch id interaction
 export const updateTouchIdEnabled = (arg: boolean, account: EdgeAccount) => async (dispatch: Dispatch, getState: GetState) => {
   const folder = CORE_SELECTORS.getFolder(getState())
@@ -239,5 +245,78 @@ export const showReEnableOtpModal = () => async (dispatch: Dispatch) => {
     // true on positive, false on negative
     // let 2FA expire
     dispatch(keepOtp())
+  }
+}
+
+export const updateIsSetCustomNodesModalVisible = (isSetCustomNodesModalVisible: boolean) => {
+  return {
+    type: 'SET_CUSTOM_NODES_MODAL_VISIBILITY',
+    data: { isSetCustomNodesModalVisible }
+  }
+}
+export const enableCustomNodes = (currencyCode: string) => async (dispatch: Dispatch, getState: GetState) => {
+  const state: State = getState()
+  const account = CORE_SELECTORS.getAccount(state)
+  const currencyPluginName = CURRENCY_PLUGIN_NAMES[currencyCode]
+  const currencyPlugin = account.currencyTools[currencyPluginName]
+  try {
+    const settingsSavePromise = ACCOUNT_SETTINGS.setIsCustomNodesEnabled(account, currencyCode, true)
+    const pluginSavePromise = currencyPlugin.changePluginSettings({ disableFetchingServers: true })
+    await Promise.all([settingsSavePromise, pluginSavePromise])
+    dispatch(setIsCustomNodesEnabled(currencyCode, true))
+  } catch (e) {
+    console.log(e)
+    throw new Error(e)
+  }
+}
+export const disableCustomNodes = (currencyCode: string) => async (dispatch: Dispatch, getState: GetState) => {
+  const state: State = getState()
+  const account = CORE_SELECTORS.getAccount(state)
+  const currencyPluginName = CURRENCY_PLUGIN_NAMES[currencyCode]
+  const currencyPlugin = account.currencyTools[currencyPluginName]
+  try {
+    const settingsSavePromise = ACCOUNT_SETTINGS.setIsCustomNodesEnabled(account, currencyCode, false)
+    const pluginSavePromise = currencyPlugin.changePluginSettings({ disableFetchingServers: false })
+    await Promise.all([settingsSavePromise, pluginSavePromise])
+    dispatch(setIsCustomNodesEnabled(currencyCode, false))
+  } catch (e) {
+    console.log(e)
+    throw new Error(e)
+  }
+}
+export function setIsCustomNodesEnabled (currencyCode: string, isEnabled: boolean) {
+  return {
+    type: 'SET_ENABLE_CUSTOM_NODES',
+    data: { currencyCode, isEnabled }
+  }
+}
+export const saveCustomNodesList = (currencyCode: string, nodesList: Array<string>) => async (dispatch: Dispatch, getState: GetState) => {
+  const state: State = getState()
+  dispatch(updateCustomNodesProcessing(true))
+  const account = CORE_SELECTORS.getAccount(state)
+  const currencyPluginName = CURRENCY_PLUGIN_NAMES[currencyCode]
+  const currencyPlugin = account.currencyTools[currencyPluginName]
+  try {
+    const pluginSave = currencyPlugin.changePluginSettings({ electrumServers: nodesList, disableFetchingServers: true })
+    const settingsSave = ACCOUNT_SETTINGS.setCustomNodesList(account, currencyCode, nodesList)
+    await Promise.all([pluginSave, settingsSave])
+    dispatch(updateCustomNodesList(currencyCode, nodesList))
+  } catch (e) {
+    console.log(e)
+    dispatch(updateCustomNodesProcessing(false))
+    throw new Error('Unable to save plugin setting')
+  }
+}
+export function updateCustomNodesList (currencyCode: string, nodesList: Array<string>) {
+  return {
+    type: 'UPDATE_CUSTOM_NODES_LIST',
+    data: { currencyCode, nodesList }
+  }
+}
+
+export const updateCustomNodesProcessing = (isSetCustomNodesProcessing: boolean) => {
+  return {
+    type: 'UPDATE_CUSTOM_NODES_PROCESSING',
+    data: { isSetCustomNodesProcessing }
   }
 }

@@ -155,7 +155,7 @@ export const initializeAccount = (account: EdgeAccount, touchIdInfo: Object) => 
     accountInitObject.merchantMode = syncFinal.merchantMode
     accountInitObject.customTokens = syncFinal.customTokens
     accountInitObject.passwordRecoveryRemindersShown = syncFinal.passwordRecoveryRemindersShown
-    accountInitObject.denominationKeys.push({ currencyCode: 'BTC', denominationKey: syncFinal.BTC.denomination })
+    accountInitObject.denominationKeys.push({ currencyCode: 'BTC', denominationKey: syncFinal.BTC.denomination, customNodes: syncFinal.BTC.customNodes })
     accountInitObject.denominationKeys.push({ currencyCode: 'BCH', denominationKey: syncFinal.BCH.denomination })
     accountInitObject.denominationKeys.push({ currencyCode: 'ETH', denominationKey: syncFinal.ETH.denomination })
     if (customTokens) {
