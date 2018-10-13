@@ -1,8 +1,8 @@
 // @flow
 import { StyleSheet } from 'react-native'
 
-import { THEME } from '../../../../../../theme/variables/airbitz.js'
 import { scale } from '../../../../../../lib/scaling.js'
+import { THEME } from '../../../../../../theme/variables/airbitz.js'
 
 export const rawStyles = {
   totalBalanceBox: {
